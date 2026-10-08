@@ -2,61 +2,225 @@
 <html lang="ru"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>L I A R — каталог анкет</title>
+
 <style>
-:root{--bg:#f6f5f2;--card:#fff;--tx:#1d1d1f;--mut:#6b6b70;--ac:#4a6cf7;--bd:#e3e1db;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17171a;--card:#222226;--tx:#efefef;--mut:#9a9aa2;--ac:#8aa0ff;--bd:#33333a}}
-:root[data-theme="dark"]{--bg:#17171a;--card:#222226;--tx:#efefef;--mut:#9a9aa2;--ac:#8aa0ff;--bd:#33333a}
-*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.wrap{max-width:980px;margin:0 auto;padding:20px 16px 40px}
-h1{font-size:24px;margin:0 0 4px}.sub{color:var(--mut);margin:0 0 14px;font-size:14px}
-input[type=search]{width:100%;padding:12px 14px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font:inherit}
-.tags{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
-.chip{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:999px;padding:5px 12px;font-size:14px;cursor:pointer}
-.chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
-.card{position:relative;display:block;aspect-ratio:3/4;overflow:hidden;border:1px solid var(--bd);border-radius:14px;padding:0;cursor:pointer;background:linear-gradient(145deg,#303036,#18181b);color:#fff;font:inherit;text-align:left;isolation:isolate;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
-.card:hover{border-color:var(--ac);transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,.16)}
+:root{
+  --bg:#0b0b0e;--surface:#121218;--surface2:#191920;--surface3:#202029;
+  --tx:#f4f2f7;--mut:#92909b;--mut2:#6f6d78;--ac:#9b8cff;
+  --ac-soft:rgba(155,140,255,.13);--bd:rgba(255,255,255,.09);
+  --shadow:0 18px 50px rgba(0,0,0,.38);
+  box-sizing:border-box;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+  radial-gradient(900px 420px at 50% -120px,rgba(155,140,255,.12),transparent 70%),
+  var(--bg);
+  color:var(--tx);font:15px/1.55 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+button,input,select{font:inherit}
+button{-webkit-tap-highlight-color:transparent}
+a{color:var(--ac)}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 52px}
+
+.hero{
+  min-height:190px;display:flex;align-items:flex-end;justify-content:space-between;gap:28px;
+  padding:48px 0 28px;border-bottom:1px solid var(--bd);
+}
+.brand-kicker{font-size:11px;letter-spacing:.28em;color:var(--ac);font-weight:750;text-transform:uppercase;margin-bottom:8px}
+.brand-title{font-size:clamp(38px,7vw,72px);line-height:.92;letter-spacing:.12em;margin:0;font-weight:800}
+.brand-sub{margin:12px 0 0;color:var(--mut);font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.hero-side{text-align:right;min-width:230px}
+.live{display:inline-flex;align-items:center;gap:8px;color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.12em}
+.live:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ac);box-shadow:0 0 14px var(--ac)}
+.statsline{margin-top:12px;color:var(--tx);font-size:13px}
+.statsline span{color:var(--mut)}
+
+.controls-shell{
+  position:sticky;top:0;z-index:20;margin:0 -20px 24px;padding:14px 20px 12px;
+  background:linear-gradient(to bottom,rgba(11,11,14,.98),rgba(11,11,14,.92));
+  backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);
+}
+.controls{max-width:1180px;margin:0 auto}
+.search-row{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:10px}
+.search-wrap{position:relative}
+.search-wrap:before{
+  content:"⌕";position:absolute;left:14px;top:50%;transform:translateY(-53%);
+  color:var(--mut);font-size:22px;pointer-events:none;
+}
+#q{
+  width:100%;height:44px;padding:0 14px 0 42px;border:1px solid var(--bd);border-radius:12px;
+  background:var(--surface);color:var(--tx);outline:none;transition:border-color .18s,box-shadow .18s;
+}
+#q:focus{border-color:rgba(155,140,255,.55);box-shadow:0 0 0 3px rgba(155,140,255,.09)}
+#sort{
+  width:100%;height:44px;padding:0 34px 0 12px;border:1px solid var(--bd);border-radius:12px;
+  background:var(--surface);color:var(--tx);outline:none;cursor:pointer;
+}
+.tags{
+  display:flex;gap:7px;margin-top:10px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none
+}
+.tags::-webkit-scrollbar{display:none}
+.chip{
+  flex:0 0 auto;border:1px solid var(--bd);background:transparent;color:var(--mut);
+  border-radius:999px;padding:6px 11px;font-size:11px;letter-spacing:.045em;cursor:pointer;
+  transition:.16s ease;text-transform:uppercase;
+}
+.chip:hover{color:var(--tx);border-color:rgba(255,255,255,.18)}
+.chip.on{background:var(--ac);border-color:var(--ac);color:#0d0c11;font-weight:800}
+.chip.fav-chip:before{content:"♡ ";font-size:13px}
+.chip.archive-chip{margin-left:auto;color:#74727c}
+.chip.archive-chip.on{color:#0d0c11}
+.resultsline{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px;color:var(--mut);font-size:12px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px}
+.card{
+  position:relative;display:block;aspect-ratio:3/4;overflow:hidden;border:1px solid var(--bd);
+  border-radius:16px;padding:0;cursor:pointer;background:linear-gradient(150deg,#292831,#101014);
+  color:#fff;text-align:left;isolation:isolate;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
+}
+.card:hover{border-color:rgba(155,140,255,.5);transform:translateY(-4px);box-shadow:0 20px 45px rgba(0,0,0,.28)}
 .card:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
-.card-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .28s ease;z-index:0}
-.card:hover .card-photo{transform:scale(1.035)}
-.card-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(145deg,#303036,#18181b);color:rgba(255,255,255,.85);font-size:44px;font-weight:800;letter-spacing:.05em;text-align:center;z-index:0}
-.like-box{position:absolute;right:14px;bottom:12px;z-index:4;display:none;align-items:center;gap:6px;filter:drop-shadow(0 2px 7px rgba(0,0,0,.35))}
-.card-heart{width:22px;height:22px;display:flex;align-items:center;justify-content:center;padding:0;border:0;background:transparent;cursor:pointer}
-.card-heart svg{width:100%;height:100%;display:block;fill:transparent;stroke:#fff;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;transition:fill .18s ease,stroke .18s ease,transform .18s ease,opacity .18s ease;opacity:.95}
-.card-heart:hover svg{transform:scale(1.06)}
+.card-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease,filter .25s ease;z-index:0}
+.card:hover .card-photo{transform:scale(1.045)}
+.card-fallback{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:radial-gradient(circle at 50% 35%,#33313f,#111116 70%);color:rgba(255,255,255,.75);
+  font-size:42px;font-weight:800;letter-spacing:.06em;text-align:center;z-index:0
+}
+.card-shade{position:absolute;inset:32% 0 0;background:linear-gradient(to bottom,transparent,rgba(5,5,8,.12) 14%,rgba(5,5,8,.92) 100%);z-index:1;pointer-events:none}
+.division-badge{
+  position:absolute;left:11px;top:11px;z-index:3;max-width:72%;
+  padding:5px 8px;border:1px solid rgba(255,255,255,.16);border-radius:999px;
+  background:rgba(10,10,14,.55);backdrop-filter:blur(8px);color:rgba(255,255,255,.82);
+  font-size:9px;line-height:1;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.card-info{position:absolute;left:0;right:0;bottom:0;padding:48px 76px 13px 13px;z-index:2}
+.card-name{display:block;font-size:17px;line-height:1.15;font-weight:780;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.65)}
+.card-meta{display:block;margin-top:5px;color:rgba(255,255,255,.65);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.like-box{position:absolute;right:13px;bottom:12px;z-index:4;display:none;align-items:center;gap:5px;filter:drop-shadow(0 2px 7px rgba(0,0,0,.42))}
+.card-heart{width:21px;height:21px;display:flex;align-items:center;justify-content:center;padding:0;border:0;background:transparent;cursor:pointer}
+.card-heart svg{width:100%;height:100%;display:block;fill:transparent;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:.18s ease;opacity:.94}
+.card-heart:hover svg{transform:scale(1.08)}
 .card-heart.on svg{fill:var(--ac);stroke:var(--ac)}
-.like-count{display:block;color:#fff;font-size:16px;font-weight:600;line-height:1;letter-spacing:0}
-.card-info{padding-left:14px;padding-right:70px}
-.card-shade{position:absolute;inset:42% 0 0;background:linear-gradient(to bottom,transparent,rgba(0,0,0,.15) 18%,rgba(0,0,0,.88) 100%);z-index:1;pointer-events:none}
-.card-info{position:absolute;left:0;right:0;bottom:0;padding:48px 14px 14px;z-index:2}
-.card-name{display:block;font-size:18px;line-height:1.18;font-weight:750;color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.55)}
-.card-meta{display:block;margin-top:5px;color:rgba(255,255,255,.76);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.t{display:inline-block;font-size:12px;border:1px solid var(--bd);border-radius:999px;padding:1px 8px;margin:0 4px 4px 0;color:var(--mut)}
-.profile-photo{width:100%;max-height:380px;object-fit:cover;border-radius:12px;margin:0 0 16px;display:block;background:var(--bd)}
-@media(max-width:560px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card-info{padding:38px 10px 10px}.card-name{font-size:15px}.card-meta{font-size:11px}}
-.empty{color:var(--mut);padding:24px 0}
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:5}
+.like-count{display:block;color:#fff;font-size:13px;font-weight:650;line-height:1}
+
+.card.archived-card .card-photo{filter:grayscale(.65) brightness(.72)}
+.card.archived-card .division-badge{color:#c4c1cb}
+
+.empty{
+  grid-column:1/-1;padding:70px 20px;text-align:center;border:1px dashed var(--bd);
+  border-radius:16px;color:var(--mut);background:rgba(255,255,255,.015)
+}
+
+/* profile */
+.ov{
+  position:fixed;inset:0;background:rgba(3,3,6,.78);display:none;align-items:flex-end;justify-content:center;
+  z-index:50;padding:22px;backdrop-filter:blur(8px)
+}
 .ov.show{display:flex}
-.sheet{background:var(--card);width:100%;max-width:720px;max-height:92%;overflow:auto;border-radius:16px 16px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom,0px))}
-@media (min-width:760px){.ov{align-items:center}.sheet{border-radius:16px}}
-.sheet h2{margin:0}.mut{color:var(--mut);font-size:14px}
-dl{margin:14px 0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px}dt{color:var(--mut)}dd{margin:0}
-h3{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin:20px 0 6px}
-.sheet p{margin:0 0 8px}
-.st{display:grid;grid-template-columns:96px 1fr 22px;gap:8px;align-items:center;font-size:14px;margin:3px 0}
-.bar{height:8px;border-radius:4px;background:var(--bd);overflow:hidden}.bar i{display:block;height:100%;background:var(--ac)}
-.note{border:1px dashed var(--bd);border-radius:10px;padding:10px 12px;color:var(--mut);font-size:14px;margin-top:14px}
-.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-.btn{padding:10px 14px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font:inherit;cursor:pointer;text-decoration:none}
-.btn.p{background:var(--ac);border-color:var(--ac);color:#fff}
-</style></head><body>
+.sheet{
+  background:var(--surface);width:100%;max-width:800px;max-height:92vh;overflow:auto;
+  border:1px solid var(--bd);border-radius:22px;padding:0 20px 22px;box-shadow:var(--shadow)
+}
+.sheet::-webkit-scrollbar{width:8px}.sheet::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:20px}
+.profile-hero{
+  position:relative;margin:0 -20px 20px;height:330px;overflow:hidden;border-radius:21px 21px 0 0;
+  background:linear-gradient(150deg,#2b2935,#111116)
+}
+.profile-photo{width:100%;height:100%;object-fit:cover;display:block}
+.profile-hero:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(to bottom,transparent,rgba(10,9,14,.92))}
+.profile-head{position:absolute;z-index:2;left:22px;right:22px;bottom:19px}
+.profile-head h2{font-size:30px;line-height:1.05;margin:0 0 6px}
+.profile-alias{color:rgba(255,255,255,.7);font-size:13px}
+.profile-tags{display:flex;flex-wrap:wrap;gap:6px;margin:-6px 0 16px}
+.t{display:inline-block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid rgba(155,140,255,.25);border-radius:999px;padding:4px 9px;color:#c9c1ff;background:var(--ac-soft)}
+
+.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 18px}
+.info-item{padding:11px 12px;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.018)}
+.info-label{display:block;color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.info-value{display:block;color:var(--tx);font-size:13px;line-height:1.4}
+.info-value a{text-decoration:none}
+
+.profile-section-title{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);margin:22px 0 9px;padding-left:9px;border-left:2px solid var(--ac)}
+.st{display:grid;grid-template-columns:96px 1fr 22px;gap:8px;align-items:center;font-size:13px;margin:5px 0}
+.bar{height:7px;border-radius:5px;background:var(--surface3);overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),#b9adff)}
+
+.section-block{border-top:1px solid var(--bd);padding:0}
+.section-block:last-of-type{border-bottom:1px solid var(--bd)}
+.section-block summary{
+  list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 2px;cursor:pointer;color:var(--tx);font-size:12px;text-transform:uppercase;letter-spacing:.09em;font-weight:700
+}
+.section-block summary::-webkit-details-marker{display:none}
+.section-block summary:after{content:"+";color:var(--mut);font-size:18px;font-weight:400}
+.section-block[open] summary:after{content:"−";color:var(--ac)}
+.section-content{padding:0 2px 10px;color:#d8d6de}
+.section-content p{margin:0 0 10px;font-size:14px;line-height:1.65}
+
+.note{border:1px dashed var(--bd);border-radius:12px;padding:11px 13px;color:var(--mut);font-size:12px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid var(--bd)}
+.btn{
+  padding:9px 12px;border-radius:10px;border:1px solid var(--bd);background:transparent;color:var(--mut);
+  font:inherit;font-size:12px;cursor:pointer;text-decoration:none;transition:.16s ease
+}
+.btn:hover{color:var(--tx);border-color:rgba(255,255,255,.18)}
+.btn.p{background:var(--ac);border-color:var(--ac);color:#0d0c11;font-weight:750}
+
+@media(max-width:720px){
+  .hero{min-height:155px;padding:32px 0 22px}.hero-side{display:none}
+  .search-row{grid-template-columns:1fr 140px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .card{border-radius:13px}.card-info{padding:42px 64px 10px 10px}.card-name{font-size:14px}.card-meta{font-size:10px}
+  .division-badge{left:8px;top:8px;padding:4px 7px;font-size:8px}
+  .like-box{right:10px;bottom:10px}.like-count{font-size:12px}
+  .ov{padding:0;align-items:flex-end}.sheet{max-height:94vh;border-radius:18px 18px 0 0;border-bottom:0}
+  .profile-hero{height:285px}.profile-head h2{font-size:25px}
+  .info-grid{grid-template-columns:1fr}
+}
+@media(max-width:420px){
+  .wrap{padding-left:12px;padding-right:12px}.controls-shell{margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px}
+  .search-row{grid-template-columns:1fr}.brand-title{font-size:38px}
+}
+</style>
+</head><body>
 <div class="wrap">
-<h1>L I A R — каталог анкет</h1>
-<p class="sub" id="cnt"></p>
-<input type="search" id="q" placeholder="Поиск по имени, роли, тексту анкеты…">
-<div class="tags" id="tags"></div>
-<div class="grid" id="grid"></div>
+  <header class="hero">
+    <div>
+      <div class="brand-kicker">private character registry</div>
+      <h1 class="brand-title">LIAR</h1>
+      <p class="brand-sub">character database</p>
+    </div>
+    <div class="hero-side">
+      <div class="live">database online</div>
+      <div class="statsline" id="heroStats">—</div>
+    </div>
+  </header>
+
+  <div class="controls-shell">
+    <div class="controls">
+      <div class="search-row">
+        <div class="search-wrap">
+          <input type="search" id="q" placeholder="Поиск по имени, роли или тексту анкеты…" autocomplete="off">
+        </div>
+        <select id="sort" aria-label="Сортировка">
+          <option value="name">по имени</option>
+          <option value="popular">по популярности</option>
+          <option value="date">по дате анкеты</option>
+        </select>
+      </div>
+      <div class="tags" id="tags"></div>
+    </div>
+  </div>
+
+  <div class="resultsline">
+    <span id="cnt"></span>
+    <span id="sectionLabel">ALL CHARACTERS</span>
+  </div>
+  <div class="grid" id="grid"></div>
 </div>
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
 <script>
@@ -70,6 +234,7 @@ const C=[{"id":"archie","name":"Аарон Тейлор-Джонсон","aka":["
 const SEC=[["character","Характер"],["biography","Биография"],["ability","Способности"],["weaknesses","Слабости"],["hobby","Увлечения"],["features","Особенности"],["appearance","Внешность"]];
 const ST=["Сила","Ловкость","Интеллект","Восприятие","Харизма"];
 const $=s=>document.querySelector(s);let act=null;
+
 const ARCHIVE_KEY="liarArchiveState";
 const VISITOR_KEY="liarLikeVisitorId";
 let archiveState={};
@@ -86,127 +251,221 @@ if(!visitorId){
  visitorId=(crypto.randomUUID?crypto.randomUUID():("v-"+Date.now()+"-"+Math.random().toString(36).slice(2)));
  try{localStorage.setItem(VISITOR_KEY,visitorId)}catch(e){}
 }
-let likeCounts={},likedByMe={};
+let likeCounts={},likedByMe={},likesLoaded=false;
 
-function firebaseReady(){
- return FIREBASE_DB_URL && !FIREBASE_DB_URL.includes("PASTE_FIREBASE_DATABASE_URL_HERE");
+function firebaseReady(){return FIREBASE_DB_URL && !FIREBASE_DB_URL.includes("PASTE_FIREBASE_DATABASE_URL_HERE")}
+function likesUrl(path=""){return FIREBASE_DB_URL.replace(/\/$/,"")+"/likes"+path+".json"}
+function formatCount(n){
+ n=Number(n)||0;
+ if(n>=1000000)return (Math.round(n/100000)/10).toString().replace(".",",")+"M";
+ if(n>=1000)return (Math.round(n/100)/10).toString().replace(".",",")+"K";
+ return String(n)
 }
-function likesUrl(path=""){
- const base=FIREBASE_DB_URL.replace(/\/$/,"");
- return base+"/likes"+path+".json";
+function updateHeroStats(){
+ const active=C.filter(c=>c.archived!==true).length;
+ const divisions=5;
+ const likes=Object.values(likeCounts).reduce((a,b)=>a+(Number(b)||0),0);
+ $("#heroStats").innerHTML=active+' <span>characters</span> · '+divisions+' <span>divisions</span> · '+formatCount(likes)+' <span>likes</span>';
 }
 function refreshLikeUI(id){
  document.querySelectorAll('[data-like-id="'+id+'"]').forEach(box=>{
-  const heart=box.querySelector(".card-heart");
-  const count=box.querySelector(".like-count");
+  const heart=box.querySelector(".card-heart"),count=box.querySelector(".like-count");
+  if(!heart||!count)return;
   heart.classList.toggle("on",!!likedByMe[id]);
   heart.setAttribute("aria-label",likedByMe[id]?"Убрать лайк":"Поставить лайк");
-  const n=likeCounts[id]||0;
-  count.textContent=n>=1000?(Math.round(n/100)/10).toString().replace(".",",")+"K":String(n);
- });
+  count.textContent=formatCount(likeCounts[id]||0);
+ })
 }
 async function loadLikes(){
- if(!firebaseReady())return;
+ if(!firebaseReady()){likesLoaded=true;updateHeroStats();return}
  try{
   const r=await fetch(likesUrl(),{cache:"no-store"});
   if(!r.ok)throw new Error("likes load");
-  const data=await r.json()||{};
-  likeCounts={};likedByMe={};
+  const data=await r.json()||{};likeCounts={};likedByMe={};
   Object.entries(data).forEach(([charId,visitors])=>{
    const ids=visitors&&typeof visitors==="object"?Object.keys(visitors):[];
-   likeCounts[charId]=ids.length;
-   likedByMe[charId]=ids.includes(visitorId);
+   likeCounts[charId]=ids.length;likedByMe[charId]=ids.includes(visitorId)
   });
-  C.forEach(c=>refreshLikeUI(c.id));
  }catch(e){console.warn("Не удалось загрузить лайки",e)}
+ likesLoaded=true;updateHeroStats();grid()
 }
 async function toggleLike(c){
- const id=c.id;
- const was=!!likedByMe[id];
- likedByMe[id]=!was;
- likeCounts[id]=Math.max(0,(likeCounts[id]||0)+(was?-1:1));
- refreshLikeUI(id);
+ const id=c.id,was=!!likedByMe[id];
+ likedByMe[id]=!was;likeCounts[id]=Math.max(0,(likeCounts[id]||0)+(was?-1:1));
+ refreshLikeUI(id);updateHeroStats();
+ if(act==="FAVORITES"||$("#sort").value==="popular")grid();
  if(!firebaseReady())return;
  const url=likesUrl("/"+encodeURIComponent(id)+"/"+encodeURIComponent(visitorId));
  try{
-  const r=await fetch(url,{
-   method:was?"DELETE":"PUT",
-   headers:was?{}:{"Content-Type":"application/json"},
-   body:was?undefined:"true"
-  });
-  if(!r.ok)throw new Error("like save");
+  const r=await fetch(url,{method:was?"DELETE":"PUT",headers:was?{}:{"Content-Type":"application/json"},body:was?undefined:"true"});
+  if(!r.ok)throw new Error("like save")
  }catch(e){
-  likedByMe[id]=was;
-  likeCounts[id]=Math.max(0,(likeCounts[id]||0)+(was?1:-1));
-  refreshLikeUI(id);
-  console.warn("Не удалось сохранить лайк",e);
+  likedByMe[id]=was;likeCounts[id]=Math.max(0,(likeCounts[id]||0)+(was?1:-1));
+  updateHeroStats();grid();console.warn("Не удалось сохранить лайк",e)
  }
 }
+
 const ageS=a=>{a=a||"";const m=a.match(/^\d+(\s*(лет|года|год))?/i);return m?m[0]:a.slice(0,26)};
 const hay=c=>[c.name,c.aka.join(" "),c.age.join(" "),c.role.join(" "),c.tags.join(" "),Object.values(c.sections).flat().join(" ")].join(" ").toLowerCase();
 C.forEach(c=>c._h=hay(c));
-function tagsBar(){const el=$("#tags");el.innerHTML="";
- const tagOrder=["ADMINISTRATION","TARGET ELIMINATION","HORTUS","THE LAB","THE BASE","ARCHIVE"];
- [null,...tagOrder.filter(t=>t==="ARCHIVE"||C.some(c=>c.tags.includes(t)))].forEach(t=>{
-  const b=document.createElement("button");b.className="chip"+(act===t?" on":"");b.textContent=t||"Все";
-  b.onclick=()=>{act=t;tagsBar();grid()};el.appendChild(b)})}
-function grid(){const q=$("#q").value.trim().toLowerCase();
- const pool=act==="ARCHIVE"?C.filter(c=>c.archived===true):C.filter(c=>c.archived!==true);
- const L=pool.filter(c=>(act==="ARCHIVE"||!act||c.tags.includes(act))&&(!q||c._h.includes(q))).sort((a,b)=>a.name.localeCompare(b.name,"ru"));
- $("#cnt").textContent=act==="ARCHIVE"?"ARCHIVE: "+L.length:"Анкет: "+L.length+" из "+C.filter(c=>c.archived!==true).length;
- const g=$("#grid");g.innerHTML="";if(!L.length){g.innerHTML='<div class="empty">Ничего не найдено</div>';return}
+
+const months={янв:1,фев:2,мар:3,апр:4,май:5,мая:5,июн:6,июл:7,авг:8,сен:9,сент:9,окт:10,ноя:11,дек:12};
+function dateRank(c){
+ const s=(c.date||"").toLowerCase(),m=s.match(/(\d{1,2})\s+([а-яё]+)/i);
+ if(!m)return 0;const mon=months[m[2].slice(0,4)]||months[m[2].slice(0,3)]||0;return mon*100+Number(m[1])
+}
+
+function tagsBar(){
+ const el=$("#tags");el.innerHTML="";
+ const items=[
+  {v:null,t:"ALL"},
+  {v:"ADMINISTRATION",t:"ADMINISTRATION"},
+  {v:"TARGET ELIMINATION",t:"TARGET ELIMINATION"},
+  {v:"HORTUS",t:"HORTUS"},
+  {v:"THE LAB",t:"THE LAB"},
+  {v:"THE BASE",t:"THE BASE"},
+  {v:"FAVORITES",t:"FAVORITES",cls:"fav-chip"},
+  {v:"ARCHIVE",t:"ARCHIVE",cls:"archive-chip"}
+ ];
+ items.forEach(item=>{
+  if(item.v && !["FAVORITES","ARCHIVE"].includes(item.v) && !C.some(c=>c.tags.includes(item.v)))return;
+  const b=document.createElement("button");
+  b.className="chip"+(act===item.v?" on":"")+(item.cls?" "+item.cls:"");
+  b.textContent=item.t;
+  b.onclick=()=>{act=item.v;tagsBar();grid()};
+  el.appendChild(b)
+ })
+}
+
+function getList(){
+ const q=$("#q").value.trim().toLowerCase();
+ let pool;
+ if(act==="ARCHIVE")pool=C.filter(c=>c.archived===true);
+ else pool=C.filter(c=>c.archived!==true);
+ if(act==="FAVORITES")pool=pool.filter(c=>likedByMe[c.id]);
+ else if(act && act!=="ARCHIVE")pool=pool.filter(c=>c.tags.includes(act));
+ if(q)pool=pool.filter(c=>c._h.includes(q));
+ const sort=$("#sort").value;
+ if(sort==="popular")pool.sort((a,b)=>(likeCounts[b.id]||0)-(likeCounts[a.id]||0)||a.name.localeCompare(b.name,"ru"));
+ else if(sort==="date")pool.sort((a,b)=>dateRank(b)-dateRank(a)||a.name.localeCompare(b.name,"ru"));
+ else pool.sort((a,b)=>a.name.localeCompare(b.name,"ru"));
+ return pool
+}
+
+function grid(){
+ const L=getList(),active=C.filter(c=>c.archived!==true).length;
+ $("#cnt").textContent=L.length+" из "+(act==="ARCHIVE"?C.filter(c=>c.archived===true).length:active);
+ $("#sectionLabel").textContent=act||"ALL CHARACTERS";
+ const g=$("#grid");g.innerHTML="";
+ if(!L.length){
+  g.innerHTML='<div class="empty">'+(act==="FAVORITES"&&!likesLoaded?"Загружаем избранное…":act==="FAVORITES"?"Здесь появятся персонажи, которым вы поставили ♥":"Ничего не найдено")+'</div>';
+  return
+ }
  L.forEach(c=>{
-  const b=document.createElement("div");b.className="card";b.tabIndex=0;b.setAttribute("role","button");b.setAttribute("aria-label","Открыть анкету: "+c.name);
+  const b=document.createElement("div");b.className="card"+(c.archived===true?" archived-card":"");b.tabIndex=0;b.setAttribute("role","button");b.setAttribute("aria-label","Открыть анкету: "+c.name);
   const img=document.createElement("img");img.className="card-photo";img.src=c.photo||("images/"+c.id+".jpg");img.alt="";
   const fb=document.createElement("div");fb.className="card-fallback";fb.textContent=(c.name||"?").split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase();
+
+  const badge=document.createElement("span");badge.className="division-badge";badge.textContent=c.archived===true?"ARCHIVE":(c.tags[0]||"LIAR");
+
   const likeBox=document.createElement("div");likeBox.className="like-box";likeBox.dataset.likeId=c.id;
   const heart=document.createElement("button");heart.className="card-heart";heart.type="button";heart.setAttribute("aria-label","Поставить лайк");
   heart.innerHTML='<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"></path></svg>';
-  const count=document.createElement("span");count.className="like-count";count.textContent=String(likeCounts[c.id]||0);
+  const count=document.createElement("span");count.className="like-count";count.textContent=formatCount(likeCounts[c.id]||0);
   if(likedByMe[c.id])heart.classList.add("on");
   heart.onclick=e=>{e.stopPropagation();toggleLike(c)};
   likeBox.append(heart,count);
-  img.onload=()=>{fb.style.display="none";likeBox.style.display="flex"};img.onerror=()=>{img.style.display="none";fb.style.display="flex";likeBox.style.display="none"};
+
+  img.onload=()=>{fb.style.display="none";likeBox.style.display="flex"};
+  img.onerror=()=>{img.style.display="none";fb.style.display="flex";likeBox.style.display="flex"};
+
   const shade=document.createElement("div");shade.className="card-shade";
   const info=document.createElement("div");info.className="card-info";
   const name=document.createElement("span");name.className="card-name";name.textContent=c.name;
   const meta=document.createElement("span");meta.className="card-meta";meta.textContent=[c.ageShort||ageS(c.age[0]),c.aka[0]].filter(Boolean).join(" · ");
-  info.append(name,meta);b.append(img,fb,likeBox,shade,info);
+  info.append(name,meta);b.append(img,fb,badge,likeBox,shade,info);
   b.onclick=()=>open(c.id);
   b.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open(c.id)}};
   g.appendChild(b)
- })}
+ })
+}
+
 function el(tag,txt,cls){const e=document.createElement(tag);if(txt!=null)e.textContent=txt;if(cls)e.className=cls;return e}
-function open(id){const c=C.find(x=>x.id===id);if(!c)return;const s=$("#sheet");s.innerHTML="";
- {const pic=document.createElement("img");pic.className="profile-photo";pic.src="images/"+c.id+"-profile.jpg";pic.alt=c.name;pic.onerror=()=>pic.remove();s.append(pic)}
- s.append(el("h2",c.name));
- const aka=c.aka.map(a=>a.replace(/\s*\|\s*/g,", ").replace(/[,\s|]+$/,"")).join(" · ");if(aka)s.append(el("div",aka,"mut"));
- const dl=el("dl");[["Возраст",c.age.join(" ")],["Роль",c.role.join(" ")],["Ориентация",c.orient.join(" ")]].forEach(([k,v])=>{if(v){dl.append(el("dt",k),el("dd",v))}});
- dl.append(el("dt","Игрок"));const dd=el("dd");const a=el("a",c.player.name);a.href=c.player.url;a.target="_blank";a.rel="noopener";dd.append(a);dl.append(dd);
- dl.append(el("dt","Анкета от"),el("dd",c.date));s.append(dl);
- if(c.epigraph)s.append(el("p",c.epigraph,"mut"));
- if(c.tags.length){const d=el("div");c.tags.forEach(t=>d.append(el("span",t,"t")));s.append(d)}
+function infoItem(label,value,node){
+ const d=el("div",null,"info-item");d.append(el("span",label,"info-label"));
+ const v=el("span",null,"info-value");if(node)v.append(node);else v.textContent=value||"—";d.append(v);return d
+}
+function addSection(s,title,paragraphs,opened=false){
+ if(!paragraphs||!paragraphs.length)return;
+ const d=document.createElement("details");d.className="section-block";d.open=opened;
+ const sm=document.createElement("summary");sm.textContent=title;
+ const content=el("div",null,"section-content");
+ paragraphs.forEach(x=>content.append(el("p",x)));
+ d.append(sm,content);s.append(d)
+}
+
+function open(id){
+ const c=C.find(x=>x.id===id);if(!c)return;
+ const s=$("#sheet");s.innerHTML="";
+
+ const hero=el("div",null,"profile-hero");
+ const pic=document.createElement("img");pic.className="profile-photo";pic.src="images/"+c.id+"-profile.jpg";pic.alt=c.name;
+ const head=el("div",null,"profile-head");head.append(el("h2",c.name));
+ const aka=c.aka.map(a=>a.replace(/\s*\|\s*/g,", ").replace(/[,\s|]+$/,"")).join(" · ");
+ if(aka)head.append(el("div",aka,"profile-alias"));
+ hero.append(pic,head);s.append(hero);
+ pic.onerror=()=>{pic.remove();hero.style.height="170px"};
+
+ if(c.tags.length){
+  const tags=el("div",null,"profile-tags");c.tags.forEach(t=>tags.append(el("span",t,"t")));s.append(tags)
+ }
+
+ const info=el("div",null,"info-grid");
+ info.append(infoItem("Возраст",c.age.join(" ")));
+ info.append(infoItem("Роль",c.role.join(" ")));
+ info.append(infoItem("Ориентация",c.orient.join(" ")));
+ const playerLink=el("a",c.player.name);playerLink.href=c.player.url;playerLink.target="_blank";playerLink.rel="noopener";
+ info.append(infoItem("Игрок",null,playerLink));
+ info.append(infoItem("Анкета от",c.date));
+ s.append(info);
+
+ if(c.epigraph)s.append(el("p",c.epigraph,"profile-alias"));
+
  const sk=ST.filter(k=>k in c.stats);
- if(sk.length){s.append(el("h3","Характеристики"));sk.forEach(k=>{const r=el("div",null,"st");const b=el("div",null,"bar"),i=el("i");i.style.width=Math.min(100,c.stats[k]*10)+"%";b.append(i);r.append(el("span",k),b,el("span",c.stats[k]));s.append(r)})}
- SEC.forEach(([k,t])=>{const p=c.sections[k];if(p&&p.length){s.append(el("h3",t));p.forEach(x=>s.append(el("p",x)))}});
- if(!c.sections.appearance)s.append(el("div","В загруженных страницах эта анкета неполная: остальные разделы, вероятно, в комментариях на следующих страницах обсуждения.","note"));
- if(c.tracks.length){s.append(el("h3","Трек"));c.tracks.forEach(x=>s.append(el("p",x)))}
+ if(sk.length){
+  s.append(el("div","Характеристики","profile-section-title"));
+  sk.forEach(k=>{const r=el("div",null,"st"),b=el("div",null,"bar"),i=el("i");i.style.width=Math.min(100,c.stats[k]*10)+"%";b.append(i);r.append(el("span",k),b,el("span",c.stats[k]));s.append(r)})
+ }
+
+ SEC.forEach(([k,t])=>addSection(s,t,c.sections[k],k==="character"||k==="biography"));
+ if(!c.sections.appearance)s.append(el("div","В загруженных страницах эта анкета неполная: остальные разделы, вероятно, находятся на следующих страницах обсуждения.","note"));
+ if(c.tracks.length)addSection(s,"Трек",c.tracks,false);
+
  const row=el("div",null,"row");
  if(c.archived===true){
   const restore=el("button","вытащить из архива","btn p");
-  restore.onclick=()=>{setArchived(c,false);close();act=null;tagsBar();grid()};
-  row.append(restore);
+  restore.onclick=()=>{setArchived(c,false);close();act=null;tagsBar();grid();updateHeroStats()};
+  row.append(restore)
  }else{
   const archive=el("button","в архив","btn");
-  archive.onclick=()=>{setArchived(c,true);close();act="ARCHIVE";tagsBar();grid()};
-  row.append(archive);
+  archive.onclick=()=>{setArchived(c,true);close();act="ARCHIVE";tagsBar();grid();updateHeroStats()};
+  row.append(archive)
  }
  const o=el("a","открыть обсуждение в вк","btn p");o.href=TOPIC;o.target="_blank";o.rel="noopener";
- const x=el("button","Закрыть","btn");x.onclick=close;row.append(o,x);s.append(row);
- $("#ov").classList.add("show");s.scrollTop=0;try{history.replaceState(null,"","#"+id)}catch(e){}}
-function close(){$("#ov").classList.remove("show");try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}}
+ const x=el("button","закрыть","btn");x.onclick=close;row.append(o,x);s.append(row);
+
+ $("#ov").classList.add("show");s.scrollTop=0;
+ try{history.replaceState(null,"","#"+id)}catch(e){}
+}
+function close(){
+ $("#ov").classList.remove("show");
+ try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+}
+
 $("#ov").addEventListener("click",e=>{if(e.target.id==="ov")close()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
 $("#q").addEventListener("input",grid);
-tagsBar();grid();loadLikes();if(location.hash)open(location.hash.slice(1));
+$("#sort").addEventListener("change",grid);
+
+tagsBar();grid();updateHeroStats();loadLikes();if(location.hash)open(location.hash.slice(1));
 </script></body></html>
