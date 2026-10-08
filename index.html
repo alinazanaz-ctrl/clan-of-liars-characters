@@ -235,15 +235,50 @@ const SEC=[["character","Характер"],["biography","Биография"],[
 const ST=["Сила","Ловкость","Интеллект","Восприятие","Харизма"];
 const $=s=>document.querySelector(s);let act=null;
 
-const ARCHIVE_KEY="liarArchiveState";
 const VISITOR_KEY="liarLikeVisitorId";
 let archiveState={};
-try{archiveState=JSON.parse(localStorage.getItem(ARCHIVE_KEY)||"{}")}catch(e){archiveState={}}
-C.forEach(c=>{if(Object.prototype.hasOwnProperty.call(archiveState,c.id))c.archived=!!archiveState[c.id]});
-function setArchived(c,value){
+
+function archiveUrl(path=""){return FIREBASE_DB_URL.replace(/\/$/,"")+"/archive"+path+".json"}
+function applyArchiveState(data){
+ archiveState=(data&&typeof data==="object")?data:{};
+ C.forEach(c=>c.archived=!!archiveState[c.id]);
+}
+async function loadArchive(){
+ if(!firebaseReady()){updateHeroStats();grid();return}
+ try{
+  const r=await fetch(archiveUrl(),{cache:"no-store"});
+  if(!r.ok)throw new Error("archive load");
+  const data=await r.json()||{};
+  applyArchiveState(data);
+  if($("#ov").classList.contains("show") && location.hash){
+   const id=location.hash.slice(1), current=C.find(x=>x.id===id);
+   if(current && current.archived===true && act!=="ARCHIVE"){ close(); }
+  }
+  tagsBar();grid();updateHeroStats();
+ }catch(e){console.warn("Не удалось загрузить архив",e)}
+}
+async function setArchived(c,value){
+ const prev=!!c.archived;
  c.archived=!!value;
  archiveState[c.id]=c.archived;
- try{localStorage.setItem(ARCHIVE_KEY,JSON.stringify(archiveState))}catch(e){}
+ tagsBar();grid();updateHeroStats();
+ if(!firebaseReady())return;
+ const url=archiveUrl("/"+encodeURIComponent(c.id));
+ try{
+  const r=await fetch(url,{
+   method:value?"PUT":"DELETE",
+   headers:value?{"Content-Type":"application/json"}:{},
+   body:value?"true":undefined
+  });
+  if(!r.ok)throw new Error("archive save");
+  if(!value)delete archiveState[c.id];
+ }catch(e){
+  c.archived=prev;
+  if(prev)archiveState[c.id]=true
+  else delete archiveState[c.id]
+  tagsBar();grid();updateHeroStats();
+  console.warn("Не удалось сохранить архив",e)
+ }
 }
 
 let visitorId=localStorage.getItem(VISITOR_KEY);
@@ -439,16 +474,17 @@ function open(id){
 
  SEC.forEach(([k,t])=>addSection(s,t,c.sections[k],k==="character"||k==="biography"));
  if(!c.sections.appearance)s.append(el("div","В загруженных страницах эта анкета неполная: остальные разделы, вероятно, находятся на следующих страницах обсуждения.","note"));
+if(firebaseReady())s.append(el("div","Архив теперь общий: если вы отправите персонажа в архив или вернёте его обратно, это увидят все посетители сайта.","note"));
  if(c.tracks.length)addSection(s,"Трек",c.tracks,false);
 
  const row=el("div",null,"row");
  if(c.archived===true){
   const restore=el("button","вытащить из архива","btn p");
-  restore.onclick=()=>{setArchived(c,false);close();act=null;tagsBar();grid();updateHeroStats()};
+  restore.onclick=async()=>{await setArchived(c,false);close();act=null;tagsBar();grid();updateHeroStats()};
   row.append(restore)
  }else{
   const archive=el("button","в архив","btn");
-  archive.onclick=()=>{setArchived(c,true);close();act="ARCHIVE";tagsBar();grid();updateHeroStats()};
+  archive.onclick=async()=>{await setArchived(c,true);close();act="ARCHIVE";tagsBar();grid();updateHeroStats()};
   row.append(archive)
  }
  const o=el("a","открыть обсуждение в вк","btn p");o.href=TOPIC;o.target="_blank";o.rel="noopener";
@@ -467,5 +503,8 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
 $("#q").addEventListener("input",grid);
 $("#sort").addEventListener("change",grid);
 
-tagsBar();grid();updateHeroStats();loadLikes();if(location.hash)open(location.hash.slice(1));
+tagsBar();grid();updateHeroStats();loadArchive();loadLikes();
+setInterval(loadArchive,15000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)loadArchive()});
+if(location.hash)open(location.hash.slice(1));
 </script></body></html>
