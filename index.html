@@ -21,12 +21,12 @@ input[type=search]{width:100%;padding:12px 14px;border:1px solid var(--bd);borde
 .card-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .28s ease;z-index:0}
 .card:hover .card-photo{transform:scale(1.035)}
 .card-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(145deg,#303036,#18181b);color:rgba(255,255,255,.85);font-size:44px;font-weight:800;letter-spacing:.05em;text-align:center;z-index:0}
-.like-box{position:absolute;right:12px;bottom:10px;z-index:4;display:none;align-items:center;gap:6px;filter:drop-shadow(0 2px 7px rgba(0,0,0,.45))}
-.card-heart{width:34px;height:34px;display:flex;align-items:center;justify-content:center;padding:4px;border:0;background:transparent;cursor:pointer}
+.like-box{position:absolute;right:12px;bottom:12px;z-index:4;display:none;align-items:center;gap:3px;color:rgba(255,255,255,.78);filter:drop-shadow(0 1px 4px rgba(0,0,0,.7))}
+.card-heart{width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:2px;border:0;background:transparent;cursor:pointer}
 .card-heart svg{width:100%;height:100%;display:block;fill:transparent;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:fill .18s ease,stroke .18s ease,transform .18s ease}
 .card-heart:hover svg{transform:scale(1.08)}
 .card-heart.on svg{fill:var(--ac);stroke:var(--ac)}
-.like-count{min-width:28px;height:28px;padding:0 7px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.95);color:#27232d;font-size:12px;font-weight:750;line-height:1;box-sizing:border-box}
+.like-count{display:inline-block;min-width:0;height:auto;padding:0;background:none;border:0;border-radius:0;color:rgba(255,255,255,.82);font-size:13px;font-weight:500;line-height:1.2;font-variant-numeric:tabular-nums}
 .card-info{padding-right:92px}
 .card-shade{position:absolute;inset:42% 0 0;background:linear-gradient(to bottom,transparent,rgba(0,0,0,.15) 18%,rgba(0,0,0,.88) 100%);z-index:1;pointer-events:none}
 .card-info{position:absolute;left:0;right:0;bottom:0;padding:48px 14px 14px;z-index:2}
@@ -95,13 +95,14 @@ function likesUrl(path=""){
  const base=FIREBASE_DB_URL.replace(/\/$/,"");
  return base+"/likes"+path+".json";
 }
+function formatLikeCount(n){return n>=1000000?(n/1000000).toFixed(1).replace(".",",").replace(/,0$/,"")+"M":n>=1000?(n/1000).toFixed(1).replace(".",",").replace(/,0$/,"")+"K":String(n)}
 function refreshLikeUI(id){
  document.querySelectorAll('[data-like-id="'+id+'"]').forEach(box=>{
   const heart=box.querySelector(".card-heart");
   const count=box.querySelector(".like-count");
   heart.classList.toggle("on",!!likedByMe[id]);
   heart.setAttribute("aria-label",likedByMe[id]?"Убрать лайк":"Поставить лайк");
-  count.textContent=String(likeCounts[id]||0);
+  count.textContent=formatLikeCount(likeCounts[id]||0);
  });
 }
 async function loadLikes(){
@@ -161,7 +162,7 @@ function grid(){const q=$("#q").value.trim().toLowerCase();
   const likeBox=document.createElement("div");likeBox.className="like-box";likeBox.dataset.likeId=c.id;
   const heart=document.createElement("button");heart.className="card-heart";heart.type="button";heart.setAttribute("aria-label","Поставить лайк");
   heart.innerHTML='<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"></path></svg>';
-  const count=document.createElement("span");count.className="like-count";count.textContent=String(likeCounts[c.id]||0);
+  const count=document.createElement("span");count.className="like-count";count.textContent=formatLikeCount(likeCounts[c.id]||0);
   if(likedByMe[c.id])heart.classList.add("on");
   heart.onclick=e=>{e.stopPropagation();toggleLike(c)};
   likeBox.append(heart,count);
