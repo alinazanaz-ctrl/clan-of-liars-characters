@@ -507,4 +507,80 @@ tagsBar();grid();updateHeroStats();loadArchive();loadLikes();
 setInterval(loadArchive,15000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)loadArchive()});
 if(location.hash)open(location.hash.slice(1));
-</script></body></html>
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    getDocs
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDsY8nsU-PiDVh9N26F_GWK8ef2kmHr7Fk",
+    authDomain: "clan-of-liars.firebaseapp.com",
+    databaseURL: "https://clan-of-liars-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "clan-of-liars",
+    storageBucket: "clan-of-liars.firebasestorage.app",
+    messagingSenderId: "26517257481",
+    appId: "1:26517257481:web:30c96a70b57665e615a7d8"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const testBadge = document.createElement("div");
+
+  testBadge.style.cssText = `
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 99999;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #2A2A30;
+    background: #141419;
+    color: #F2F2F4;
+    font: 12px Inter, Arial, sans-serif;
+    box-shadow: 0 8px 30px rgba(0,0,0,.35);
+  `;
+
+  testBadge.textContent = "Подключение к Firestore...";
+
+  document.body.appendChild(testBadge);
+
+  try {
+    const charactersQuery = query(
+      collection(db, "characters"),
+      where("status", "==", "active")
+    );
+
+    const snapshot = await getDocs(charactersQuery);
+
+    const testCharacter = snapshot.docs.find(
+      doc => doc.id === "test-character"
+    );
+
+    if (testCharacter) {
+      testBadge.textContent =
+        "Firestore подключен ✓ " +
+        testCharacter.data().name;
+    } else {
+      testBadge.textContent =
+        "Firestore подключен, но test-character не найден";
+    }
+
+  } catch (error) {
+    console.error("Firestore error:", error);
+
+    testBadge.style.borderColor = "#B65A5A";
+    testBadge.textContent =
+      "Ошибка Firestore: " + error.message;
+  }
+</script>
+
+</body>
+</html>
