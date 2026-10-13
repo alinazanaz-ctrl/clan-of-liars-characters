@@ -342,7 +342,66 @@ async function toggleLike(c){
 
 const ageS=a=>{a=a||"";const m=a.match(/^\d+(\s*(лет|года|год))?/i);return m?m[0]:a.slice(0,26)};
 const hay=c=>[c.name,c.aka.join(" "),c.age.join(" "),c.role.join(" "),c.tags.join(" "),Object.values(c.sections).flat().join(" ")].join(" ").toLowerCase();
+
 C.forEach(c=>c._h=hay(c));
+
+/* Персонажи из Cloud Firestore.
+   Старый каталог пока остается в index.html, а новые ACTIVE-документы
+   из коллекции characters автоматически добавляются к нему. */
+window.LIAR_ADD_FIRESTORE_CHARACTERS = function(items){
+  if(!Array.isArray(items) || !items.length) return;
+
+  const normalizeList = v => Array.isArray(v) ? v : (v == null || v === "" ? [] : [String(v)]);
+  const normalizeSections = d => ({
+    character: normalizeList(d.sections?.character ?? d.character),
+    biography: normalizeList(d.sections?.biography ?? d.biography),
+    ability: normalizeList(d.sections?.ability ?? d.ability ?? d.abilities),
+    weaknesses: normalizeList(d.sections?.weaknesses ?? d.weaknesses),
+    hobby: normalizeList(d.sections?.hobby ?? d.hobby ?? d.hobbies),
+    features: normalizeList(d.sections?.features ?? d.features),
+    appearance: normalizeList(d.sections?.appearance ?? d.appearance)
+  });
+
+  let changed = false;
+
+  items.forEach(({id, data})=>{
+    if(!id || C.some(c=>c.id===id)) return;
+    const d = data || {};
+    const division = d.division || (Array.isArray(d.tags) && d.tags[0]) || "LIAR";
+
+    const c = {
+      id,
+      name: d.name || id,
+      aka: normalizeList(d.aka ?? d.aliases ?? d.alias),
+      age: normalizeList(d.age),
+      role: normalizeList(d.role),
+      orient: normalizeList(d.orient ?? d.orientation),
+      tags: Array.isArray(d.tags) && d.tags.length ? d.tags : [division],
+      player: {
+        name: d.player?.name || d.playerName || "",
+        url: d.player?.url || d.playerVkUrl || ""
+      },
+      date: d.date || d.createdAtText || "",
+      epigraph: d.epigraph || null,
+      sections: normalizeSections(d),
+      stats: (d.stats && typeof d.stats === "object") ? d.stats : {},
+      tracks: normalizeList(d.tracks ?? d.track),
+      photo: d.photo || d.photoUrl || ("images/"+id+".jpg"),
+      archived: !!d.archived
+    };
+
+    c._h = hay(c);
+    C.push(c);
+    changed = true;
+  });
+
+  if(changed){
+    tagsBar();
+    grid();
+    updateHeroStats();
+    if(location.hash) open(location.hash.slice(1));
+  }
+};
 
 const months={янв:1,фев:2,мар:3,апр:4,май:5,мая:5,июн:6,июл:7,авг:8,сен:9,сент:9,окт:10,ноя:11,дек:12};
 function dateRank(c){
@@ -532,54 +591,28 @@ if(location.hash)open(location.hash.slice(1));
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  const testBadge = document.createElement("div");
+  async function loadFirestoreCharacters(){
+    try{
+      const charactersQuery = query(
+        collection(db, "characters"),
+        where("status", "==", "active")
+      );
+      const snapshot = await getDocs(charactersQuery);
+      const items = snapshot.docs.map(doc => ({
+        id: doc.id,
+        data: doc.data()
+      }));
 
-  testBadge.style.cssText = `
-    position: fixed;
-    right: 16px;
-    bottom: 16px;
-    z-index: 99999;
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid #2A2A30;
-    background: #141419;
-    color: #F2F2F4;
-    font: 12px Inter, Arial, sans-serif;
-    box-shadow: 0 8px 30px rgba(0,0,0,.35);
-  `;
-
-  testBadge.textContent = "Подключение к Firestore...";
-
-  document.body.appendChild(testBadge);
-
-  try {
-    const charactersQuery = query(
-      collection(db, "characters"),
-      where("status", "==", "active")
-    );
-
-    const snapshot = await getDocs(charactersQuery);
-
-    const testCharacter = snapshot.docs.find(
-      doc => doc.id === "test-character"
-    );
-
-    if (testCharacter) {
-      testBadge.textContent =
-        "Firestore подключен ✓ " +
-        testCharacter.data().name;
-    } else {
-      testBadge.textContent =
-        "Firestore подключен, но test-character не найден";
+      if(window.LIAR_ADD_FIRESTORE_CHARACTERS){
+        window.LIAR_ADD_FIRESTORE_CHARACTERS(items);
+      }
+      console.info("LIAR Firestore characters loaded:", items.length);
+    }catch(error){
+      console.error("Не удалось загрузить персонажей из Firestore:", error);
     }
-
-  } catch (error) {
-    console.error("Firestore error:", error);
-
-    testBadge.style.borderColor = "#B65A5A";
-    testBadge.textContent =
-      "Ошибка Firestore: " + error.message;
   }
+
+  loadFirestoreCharacters();
 </script>
 
 </body>
